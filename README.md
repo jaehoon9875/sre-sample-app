@@ -14,9 +14,9 @@ git clone https://github.com/jaehoon9875/sre-sample-app
 cd sre-sample-app
 
 # 2. 환경변수 설정
-cp order-service/.env.example order-service/.env
-cp inventory-service/.env.example inventory-service/.env
-cp notification-service/.env.example notification-service/.env
+cp apps/order-service/.env.example apps/order-service/.env
+cp apps/inventory-service/.env.example apps/inventory-service/.env
+cp apps/notification-service/.env.example apps/notification-service/.env
 
 # 3. 전체 스택 실행
 docker-compose up -d
@@ -24,6 +24,7 @@ docker-compose up -d
 # 4. DB 마이그레이션
 docker-compose exec order-service alembic upgrade head
 docker-compose exec inventory-service alembic upgrade head
+
 
 # 5. 동작 확인
 curl http://localhost/health

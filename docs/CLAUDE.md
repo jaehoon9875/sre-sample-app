@@ -16,7 +16,9 @@
 | [ai-workflows.md](ai-workflows.md) | GitHub Actions + Claude AI 자동화 워크플로우 목록 및 설명 |
 | [runbooks/](runbooks/) | 장애 유형별 대응 절차서 |
 | [postmortems/](postmortems/) | 장애 포스트모텀 기록 |
-| [readme-draft.md](readme-draft.md) | 프로젝트 초기 기획 시 작성된 README 원본 (보관용) |
+
+서비스 공통 개발 원칙 및 각 서비스 도메인 상세 → [apps/CLAUDE.md](../apps/CLAUDE.md)
+Kubernetes 매니페스트 및 ArgoCD 배포 → [k8s/CLAUDE.md](../k8s/CLAUDE.md)
 
 ---
 
