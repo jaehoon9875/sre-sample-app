@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    name: ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - order-service
+          - inventory-service
+          - notification-service
+      fail-fast: false  # 한 서비스 실패해도 나머지는 계속 실행
+
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.service }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # requirements.txt 존재 여부로 서비스 구현 여부 판단
+      - name: Check if service is implemented
+        id: check
+        run: |
+          if [ -f requirements.txt ]; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+            echo "::notice::${{ matrix.service }}: requirements.txt not found, skipping checks."
+          fi
+
+      - name: Install dependencies
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff mypy pytest pytest-asyncio httpx
+
+      # ── Lint ────────────────────────────────
+      - name: Lint (ruff)
+        if: steps.check.outputs.ready == 'true'
+        run: ruff check app/
+
+      # ── Type check ──────────────────────────
+      - name: Type check (mypy)
+        if: steps.check.outputs.ready == 'true'
+        run: mypy app/ --ignore-missing-imports
+
+      # ── Test ────────────────────────────────
+      - name: Test (pytest)
+        if: steps.check.outputs.ready == 'true'
+        run: pytest tests/ -v --tb=short

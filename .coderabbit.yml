@@ -1,0 +1,29 @@
+language: "ko-KR"
+
+reviews:
+  profile: assertive
+  request_changes_workflow: true   # 문제 발견 시 Request Changes 상태로 전환
+  high_level_summary: true         # PR 상단에 요약 댓글 게시
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  path_instructions:
+    - path: "apps/**/*.py"
+      instructions: |
+        다음 프로젝트 규칙을 기준으로 리뷰:
+        - 계층 의존 방향 엄수: router → service → repository → model
+        - 모든 함수에 타입 힌트 필수 (파라미터 + 반환값)
+        - DB / HTTP / 외부 IO는 전부 async
+        - Pydantic v2로 입출력 검증 (dict 직접 사용 금지)
+        - 환경변수는 pydantic-settings BaseSettings 사용 (하드코딩 금지)
+        - 로깅은 structlog 사용 (print() 금지)
+        - 외부 서비스 호출에 tenacity retry 적용
+        - 시크릿 하드코딩 절대 금지
+    - path: "k8s/**"
+      instructions: |
+        ArgoCD 자동 배포 대상이므로 변경 시 영향도를 반드시 확인.
+        시크릿은 Secret 리소스로 분리되어 있는지 확인.
+
+chat:
+  auto_reply: true  # PR 댓글로 CodeRabbit에 질문 가능
