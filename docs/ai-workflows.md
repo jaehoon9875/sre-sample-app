@@ -1,17 +1,14 @@
 # AI 활용 워크플로우
 
-이 프로젝트에서 GitHub Actions + Claude API로 운영하는 자동화 워크플로우입니다.
-
-> 각 워크플로우는 `anthropic/claude-code-action` 또는 Claude API 직접 호출 방식을 사용합니다.
-> 세부 구현은 `.github/workflows/` 하위 각 파일 주석 참고.
+이 프로젝트에서 운영하는 AI 자동화 워크플로우입니다.
 
 ---
 
 ## 워크플로우 목록
 
-| 워크플로우 | 트리거 | 설명 |
+| 도구/워크플로우 | 트리거 | 설명 |
 |---|---|---|
-| `ai-code-review.yml` | PR 생성/업데이트 | 코드 리뷰 자동화 |
+| CodeRabbit (GitHub App) | PR 생성/업데이트 | 코드 리뷰 자동화 |
 | `ai-refactor.yml` | 이슈에 `refactor` 라벨 추가 | 리팩토링 제안 |
 | `ai-test-gen.yml` | 이슈에 `test-needed` 라벨 추가 | 테스트 코드 초안 생성 |
 | `ai-doc-update.yml` | main 브랜치 머지 | 문서 자동 업데이트 PR 생성 |
@@ -19,7 +16,10 @@
 
 ---
 
-## 1. 코드 리뷰 자동화 (`ai-code-review.yml`)
+## 1. 코드 리뷰 자동화 (CodeRabbit)
+
+[CodeRabbit](https://coderabbit.io) GitHub App으로 동작. 별도 워크플로우 파일 불필요.
+설정 파일: `.coderabbit.yml`
 
 PR 생성/업데이트 시 자동 트리거. 검토 항목:
 

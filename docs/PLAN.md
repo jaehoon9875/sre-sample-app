@@ -38,8 +38,8 @@
 
 **AI 코드 리뷰 자동화**
 
-- `.github/workflows/ai-code-review.yml` 작성 — PR 생성/업데이트 시 트리거
-- Anthropic API 키 GitHub Secret 등록 (`ANTHROPIC_API_KEY`)
+- CodeRabbit GitHub App 설치 및 레포 연동
+- `.coderabbit.yml` 작성 — 프로젝트 규칙 기반 리뷰 설정
 - 테스트 PR 생성 후 AI 리뷰 동작 확인
 
 ---
