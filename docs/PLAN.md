@@ -5,7 +5,7 @@
 
 | Stage   | 내용                              | 상태    |
 | ------- | ------------------------------- | ----- |
-| Stage 1 | 개발 환경 + CI/AI 자동화 설정            | ⬜ 미시작 |
+| Stage 1 | 개발 환경 + CI/AI 자동화 설정            | ✅ 완료   |
 | Stage 2 | order-service 구현                | ⬜ 미시작 |
 | Stage 3 | inventory-service 구현 + 서비스 간 통신 | ⬜ 미시작 |
 | Stage 4 | notification-service 구현         | ⬜ 미시작 |
