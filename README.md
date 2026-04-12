@@ -99,3 +99,4 @@ kubectl apply -f https://github.com/jaehoon9875/cloud-sre-platform/k8s/argocd/ap
 
 - [observability-platform](https://github.com/jaehoon9875/observability-platform) — 모니터링 스택 (Prometheus, Grafana, Loki, Tempo)
 - [cloud-sre-platform](https://github.com/jaehoon9875/cloud-sre-platform) — 인프라 관리 (GKE, ArgoCD, Kafka, Redis, PostgreSQL)
+# test
