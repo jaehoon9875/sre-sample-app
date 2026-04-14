@@ -11,6 +11,7 @@
 | [PLAN.md](PLAN.md) | Stage별 구현 계획 및 체크리스트. 현재 진행 단계 파악 시 참조 |
 | [ISSUES.md](ISSUES.md) | 진행 중 이슈, 미해결 항목, 보류 결정 사항 추적 |
 | [architecture.md](architecture.md) | 전체 아키텍처 설명, 서비스 간 관계, 주요 설계 결정 |
+| [git-convention.md](git-convention.md) | 브랜치 전략, 커밋 메시지 규칙, CodeRabbit PR 가이드 |
 | [slo.md](slo.md) | SLO 정의 및 Error Budget 계산 기준 |
 | [observability-guide.md](observability-guide.md) | OpenTelemetry + Prometheus 연동 가이드 (모든 서비스 공통) |
 | [ai-workflows.md](ai-workflows.md) | GitHub Actions + Claude AI 자동화 워크플로우 목록 및 설명 |

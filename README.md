@@ -38,19 +38,26 @@ curl http://localhost/health
 [Nginx - API Gateway / Rate Limiting]
    ↓              ↓              ↓
 [order-service] [inventory-service] [notification-service]
-FastAPI          FastAPI             FastAPI + Celery
-PostgreSQL       PostgreSQL          Redis (Queue)
-Redis (Cache)
-   ↓ (Kafka event)                      ↑
-   └──────────────────────────────────►─┘
+FastAPI          FastAPI             FastAPI + Celery worker
+PostgreSQL       PostgreSQL          Redis (Celery Broker)
+Redis (Cache)    OpenSearch (검색 인덱싱)
+   │
+   └─ Kafka (3 brokers) ─────────────────────────────────┐
+        order.created 이벤트                               │
+                          inventory-service (소비)         │
+                          재고 차감 → OpenSearch 인덱싱       │
+                                                          ↓
+                                          notification-service (소비)
+                                          Celery Task 발행 → worker 처리
 ```
 
 | 서비스 | 역할 | 포트 |
 |---|---|---|
 | nginx | API Gateway, Rate Limiting | 80 |
-| order-service | 주문 생성/조회/상태 관리 | 8001 |
-| inventory-service | 재고 확인/차감 | 8002 |
-| notification-service | 이메일/웹훅 알림 비동기 발송 | 8003 |
+| order-service | 주문 생성/조회/상태 관리, Kafka 이벤트 발행 | 8001 |
+| inventory-service | 재고 확인/차감, OpenSearch 인덱싱 | 8002 |
+| notification-service | Kafka 소비 → Celery Task 발행 | 8003 |
+| celery-worker | 알림 비동기 처리 (별도 batch-pool 배치) | - |
 
 ## 기술 스택
 
@@ -59,9 +66,10 @@ Redis (Cache)
 | Framework | FastAPI, Pydantic v2 |
 | ORM | SQLAlchemy (async) + Alembic |
 | Task Queue | Celery + Redis |
-| Messaging | Kafka (Strimzi) |
+| Messaging | Kafka 3-broker 클러스터 (KRaft 모드) |
 | Cache | Redis |
 | DB | PostgreSQL |
+| Search | OpenSearch 3-node 클러스터 |
 | Observability | OpenTelemetry, Prometheus, structlog |
 | Test | pytest, httpx |
 | Container | Docker, Kubernetes (GKE) |
@@ -74,6 +82,17 @@ kubectl apply -f https://github.com/jaehoon9875/cloud-sre-platform/k8s/argocd/ap
 ```
 
 이후 `k8s/` 경로 변경 시 ArgoCD가 자동 감지하여 배포합니다.
+
+### GKE Node Pool 구성
+
+| pool | 머신 타입 | spot 여부 | 배치 대상 |
+|------|----------|-----------|---------|
+| system-pool | e2-small × 1 | 고정 | 시스템 pod 전용 |
+| app-pool | e2-standard-2 × 0~3 | spot | FastAPI 3개 서비스, Redis, Nginx |
+| data-pool | e2-standard-4 × 3 | 고정 | Kafka 3 브로커, OpenSearch 3노드, PostgreSQL |
+| batch-pool | e2-standard-2 × 0~N | spot | Celery worker |
+
+> **data-pool을 고정 노드로 운영하는 이유**: Kafka replication 및 OpenSearch shard 복구 중 노드가 죽으면 데이터 유실 가능성이 있습니다. Celery worker를 별도 batch-pool로 분리한 이유는 CPU/메모리를 단기간 집중 사용하는 특성 때문으로, app-pool과 혼용 시 FastAPI 응답 시간에 영향을 줄 수 있습니다.
 
 ## SRE 실습 시나리오
 
