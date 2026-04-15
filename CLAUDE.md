@@ -38,18 +38,10 @@ apps/notification-service/  알림 서비스 (FastAPI + Celery + Redis + Kafka)
 
 ## Git Convention
 
-브랜치는 단순하게 운영한다. `main`에 직접 커밋하되, 기능 단위 작업은 `feature/` 브랜치를 활용한다.
+→ [docs/git-convention.md](docs/git-convention.md) 참고
 
-### 커밋 메시지
-
-```
-<type>(<scope>): <subject>
-
-type: feat | fix | docs | refactor | test | chore
-scope: order | inventory | notification | k8s | docs | ci
-```
-
-예시: `feat(order): 주문 생성 API 구현`, `fix(inventory): connection pool 고갈 시 503 반환`
+브랜치 전략, 커밋 메시지 규칙, CodeRabbit 코드 리뷰 가이드가 포함되어 있다.
+**`main`에 직접 push는 금지.** 모든 작업은 브랜치 생성 → PR → 머지 순서로 진행한다.
 
 ---
 
@@ -62,7 +54,7 @@ scope: order | inventory | notification | k8s | docs | ci
 
 ## 현재 진행 상태
 
-현재 **Stage 1 시작 전** 단계입니다. (전체 7 Stage)
+현재 **Stage 2 진행 전** 단계입니다. Stage 1은 완료. (전체 7 Stage)
 
 단계별 체크리스트 → [docs/PLAN.md](docs/PLAN.md)
 진행 중 이슈 → [docs/ISSUES.md](docs/ISSUES.md)

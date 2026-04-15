@@ -74,6 +74,12 @@
 - 주문 조회 시 Redis 캐시 우선 조회, 없으면 DB 조회 후 캐시 저장
 - 주문 상태 변경 시 캐시 무효화
 
+**Kafka 이벤트 발행**
+
+- 주문 생성 시 `order.created` Kafka 이벤트 발행 (inventory-service, notification-service가 소비)
+- `aiokafka` 기반 비동기 producer 구현
+- 로컬 docker-compose 환경에서 이벤트 발행 확인
+
 **테스트**
 
 - `tests/unit/` — service 레이어 단위 테스트 (외부 의존성 mock)
@@ -84,7 +90,7 @@
 
 ## Stage 3 - inventory-service 구현 + 서비스 간 통신
 
-**목표**: 재고 서비스를 구현하고, order-service에서 inventory-service를 호출하는 서비스 간 통신과 Circuit Breaker를 적용한다.
+**목표**: 재고 서비스를 구현하고, order-service에서 inventory-service를 호출하는 서비스 간 통신과 Circuit Breaker를 적용한다. Kafka 이벤트 소비 및 OpenSearch 인덱싱도 포함한다.
 
 ### 체크리스트
 
@@ -103,6 +109,13 @@
 - inventory-service 응답 실패 시 명시적 fallback 처리 (503 반환)
 - 통합 테스트 — inventory-service mock 기반 시나리오 테스트
 
+**Kafka consumer + OpenSearch 인덱싱**
+
+- `order.created` 이벤트 소비 → 재고 차감 처리 (Kafka consumer group)
+- 재고 이벤트를 OpenSearch에 인덱싱 (재고 이력 검색 목적)
+- OpenSearch 클라이언트 설정 (`opensearch-py`)
+- 단위 테스트 — Kafka consumer mock, OpenSearch mock
+
 ---
 
 ## Stage 4 - notification-service 구현
@@ -119,7 +132,6 @@
 
 **Kafka consumer**
 
-- order-service에서 주문 생성 시 Kafka 이벤트 발행 (`order.created` topic)
 - notification-service에서 `order.created` 이벤트 수신
 - 이벤트 수신 시 Celery Task로 알림 발송 처리
 
@@ -150,8 +162,15 @@
 
 - `k8s/order-service/` — Deployment, Service, ConfigMap, Secret
 - `k8s/inventory-service/` — 동일 구조
-- `k8s/notification-service/` — 동일 구조 + Celery worker Deployment
+- `k8s/notification-service/` — 동일 구조
+- `k8s/celery-worker/` — Deployment (batch-pool nodeSelector 설정)
 - `k8s/nginx/` — Deployment, Service (LoadBalancer 또는 Ingress)
+
+**Node Pool 배치 설정**
+
+- app-pool: order-service, inventory-service, notification-service, Redis, Nginx (spot)
+- data-pool: Kafka 3 브로커, OpenSearch 3노드, PostgreSQL (고정 노드) — cloud-sre-platform에서 관리
+- batch-pool: Celery worker Deployment에 `nodeSelector` 및 `tolerations` 설정 (spot)
 
 **GitHub Actions CI 확장**
 

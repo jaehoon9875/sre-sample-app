@@ -1,12 +1,15 @@
 language: "ko-KR"
 
 reviews:
-  profile: assertive
-  request_changes_workflow: true   # 문제 발견 시 Request Changes 상태로 전환
+  profile: chill
+  request_changes_workflow: false  # docs/ 같은 설계 단계 문서에서 불필요한 머지 차단 방지
   high_level_summary: true         # PR 상단에 요약 댓글 게시
   poem: false
   review_status: true
   collapse_walkthrough: false
+
+  path_filters:
+    - "!docs/**"   # 설계 단계 문서는 리뷰 대상에서 제외
 
   path_instructions:
     - path: "apps/**/*.py"
