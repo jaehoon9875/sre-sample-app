@@ -52,33 +52,55 @@
 
 **프로젝트 기반 설정**
 
-- `requirements.txt` 작성 (fastapi, sqlalchemy, alembic, pydantic-settings, redis, structlog 등)
-- `Dockerfile` 작성 (multi-stage)
-- `app/config.py` — pydantic-settings 기반 환경변수 관리
+- ✅ `requirements.txt` 작성 (fastapi, sqlalchemy, alembic, pydantic-settings, redis, structlog 등)
+- ✅ `Dockerfile` 작성 (multi-stage)
+- ✅ `app/config.py` — pydantic-settings 기반 환경변수 관리
 
 **DB 스키마 + 마이그레이션**
 
-- `apps/order-service/app/models/order.py` — Order, OrderItem SQLAlchemy 모델 정의
-- Alembic 초기화 및 첫 마이그레이션 생성
-- `docker-compose exec order-service alembic upgrade head` 동작 확인
+- ✅ `apps/order-service/app/models/order.py` — Order, OrderItem SQLAlchemy 모델 정의
+- ⬜ Alembic 첫 마이그레이션 생성 ← **다음 시작 지점**
+- ⬜ `alembic upgrade head` 동작 확인
+
+> **재개 방법**: docker-compose로 PostgreSQL을 먼저 기동한 뒤 진행한다.
+> ```bash
+> # 프로젝트 루트에서
+> docker compose up -d postgres
+>
+> # apps/order-service/.env 생성 (로컬용 — localhost 사용)
+> cp .env.example .env
+> # .env 의 DATABASE_URL 에서 postgres → localhost 로 변경
+> # Kafka 포트도 9092 → 29092 로 변경 (로컬 외부 노출 포트)
+>
+> # 마이그레이션 생성 및 적용
+> cd apps/order-service
+> source .venv/bin/activate
+> alembic revision --autogenerate -m "create orders table"
+> alembic upgrade head
+> ```
 
 **API 구현** (router → service → repository 계층 준수)
 
-- `POST /orders` — 주문 생성
-- `GET /orders/{order_id}` — 주문 조회
-- `PATCH /orders/{order_id}/status` — 주문 상태 변경
-- `GET /health` — 헬스체크
+- ✅ `POST /orders` — 주문 생성
+- ✅ `GET /orders/{order_id}` — 주문 조회
+- ✅ `PATCH /orders/{order_id}/status` — 주문 상태 변경
+- ✅ `GET /health` — 헬스체크
 
 **Redis 캐시 연동**
 
-- 주문 조회 시 Redis 캐시 우선 조회, 없으면 DB 조회 후 캐시 저장
-- 주문 상태 변경 시 캐시 무효화
+- ✅ 주문 조회 시 Redis 캐시 우선 조회, 없으면 DB 조회 후 캐시 저장
+- ✅ 주문 상태 변경 시 캐시 무효화
+
+**Kafka 이벤트 발행**
+
+- ✅ 주문 생성 시 `order.created` Kafka 이벤트 발행
+- ⬜ 로컬 docker-compose 환경에서 이벤트 발행 확인
 
 **테스트**
 
-- `tests/unit/` — service 레이어 단위 테스트 (외부 의존성 mock)
-- `tests/integration/` — 실제 DB 사용 통합 테스트 (트랜잭션 롤백 격리)
-- service 레이어 커버리지 80% 이상 확인
+- ✅ `tests/unit/` — service 레이어 단위 테스트 (외부 의존성 mock)
+- ✅ `tests/integration/` — 실제 DB 사용 통합 테스트 (트랜잭션 롤백 격리)
+- ⬜ `pytest tests/ -v --cov=app --cov-report=term-missing` 실행 및 커버리지 80% 확인
 
 ---
 
