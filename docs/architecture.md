@@ -1,6 +1,9 @@
 # Architecture
 
 > **상태**: 설계 단계 — 실제 구현 및 배포로 검증되지 않았습니다. 구현 과정에서 변경될 수 있으며, 변경 시 이 문서를 함께 업데이트합니다.
+>
+> <!-- TODO: Stage 2 완료 후 Kafka 이벤트 흐름(order.created 발행/소비) 실제 동작 검증 결과 반영 -->
+> <!-- TODO: Stage 3 완료 후 OpenSearch 인덱싱 파이프라인 검증 결과 반영 -->
 
 이 문서는 sre-sample-app의 전체 아키텍처와 주요 설계 결정 근거를 설명합니다.
 인프라(GKE, Kafka, OpenSearch 등)의 실제 구성은 [cloud-sre-platform](https://github.com/jaehoon9875/cloud-sre-platform)에서 관리합니다.
@@ -9,7 +12,7 @@
 
 ## 서비스 흐름
 
-```
+```text
 [Client]
    ↓
 [Nginx — API Gateway / Rate Limiting]
