@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, UTC
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -33,6 +34,7 @@ def fake_order() -> Order:
         user_id=1,
         status=OrderStatus.PENDING,
         total_price=Decimal("30000"),
+        created_at=datetime.now(UTC),
     )
     order.items = [
         OrderItem(

@@ -6,7 +6,7 @@
 | Stage   | 내용                              | 상태    |
 | ------- | ------------------------------- | ----- |
 | Stage 1 | 개발 환경 + CI/AI 자동화 설정            | ✅ 완료   |
-| Stage 2 | order-service 구현                | ⬜ 미시작 |
+| Stage 2 | order-service 구현                | ✅ 완료   |
 | Stage 3 | inventory-service 구현 + 서비스 간 통신 | ⬜ 미시작 |
 | Stage 4 | notification-service 구현         | ⬜ 미시작 |
 | Stage 5 | Nginx + Kubernetes + GKE 배포     | ⬜ 미시작 |
@@ -59,8 +59,8 @@
 **DB 스키마 + 마이그레이션**
 
 - ✅ `apps/order-service/app/models/order.py` — Order, OrderItem SQLAlchemy 모델 정의
-- ⬜ Alembic 첫 마이그레이션 생성 ← **다음 시작 지점**
-- ⬜ `alembic upgrade head` 동작 확인
+- ✅ Alembic 첫 마이그레이션 생성
+- ✅ `alembic upgrade head` 동작 확인
 
 > **재개 방법**: docker-compose로 PostgreSQL을 먼저 기동한 뒤 진행한다.
 > ```bash
@@ -94,13 +94,13 @@
 **Kafka 이벤트 발행**
 
 - ✅ 주문 생성 시 `order.created` Kafka 이벤트 발행
-- ⬜ 로컬 docker-compose 환경에서 이벤트 발행 확인
+- ✅ 로컬 docker-compose 환경에서 이벤트 발행 확인
 
 **테스트**
 
 - ✅ `tests/unit/` — service 레이어 단위 테스트 (외부 의존성 mock)
 - ✅ `tests/integration/` — 실제 DB 사용 통합 테스트 (트랜잭션 롤백 격리)
-- ⬜ `pytest tests/ -v --cov=app --cov-report=term-missing` 실행 및 커버리지 80% 확인
+- ✅ `pytest tests/ -v --cov=app --cov-report=term-missing` 실행 및 커버리지 80% 확인 (82% 달성)
 
 ---
 

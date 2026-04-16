@@ -39,8 +39,9 @@ class OrderRepository:
 
         self.db.add(order)        # 세션에 추가 (INSERT 예약)
         await self.db.commit()    # 실제 DB 에 INSERT 실행
-        await self.db.refresh(order)  # DB 에서 생성된 값(id, created_at 등)을 다시 로딩
-        return order
+        # commit 후 응답 직렬화 단계에서 lazy-load가 발생하지 않도록
+        # 관계(items)를 포함해 다시 조회한 객체를 반환한다.
+        return await self.get_by_id(order.id)  # type: ignore[return-value]
 
     async def get_by_id(self, order_id: uuid.UUID) -> Order | None:
         # selectinload: items 관계를 별도 SELECT 로 미리 로딩 (N+1 문제 방지)
@@ -60,5 +61,5 @@ class OrderRepository:
 
         order.status = status       # 속성 변경 (SQLAlchemy 가 변경 감지)
         await self.db.commit()      # UPDATE 실행
-        await self.db.refresh(order)
-        return order
+        # 갱신 후에도 관계(items)가 로딩된 상태를 유지하도록 재조회한다.
+        return await self.get_by_id(order_id)
