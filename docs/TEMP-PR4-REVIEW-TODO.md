@@ -53,6 +53,26 @@ PR: https://github.com/jaehoon9875/sre-sample-app/pull/4
 
 ---
 
+## 최신 리뷰 대응 분리 (2026-04-17, merge unblock 전략)
+
+**이번 PR에서 처리(저비용/저리스크)**
+
+- [x] `main.py` 시작 실패 경로에서 Redis 정리 누락 가능성 제거
+- [x] `alembic/env.py` 엔진 dispose 보장 + `NullPool` 적용
+- [x] 테스트 함수 타입힌트/문서 MD 규칙 등 스타일성 지적 우선 반영
+
+**Stage 3+로 보류(범위 확장)**
+
+- [ ] `create_order`에서 inventory reserve 선호출 + retry 3회 + 503 매핑 + 보상 해제
+- [ ] 위 계약을 고정하는 단위/통합 테스트 추가
+- [ ] 통합 테스트를 Postgres 트랜잭션 롤백 구조로 전환
+
+**PR 코멘트 대응 문구(복붙용)**
+
+`이번 PR은 Stage 2 범위 안정화/정리 목적이라 저위험 항목을 우선 반영했습니다. inventory reserve 선호출/보상 처리 및 Postgres 기반 통합 테스트 전환은 Stage 3 범위 확장 항목으로 분리해 별도 단계에서 반영하겠습니다.`
+
+---
+
 ## 중간 우선순위 (시간 여유 시)
 
 - [ ] `apps/order-service/README.md` 오타 수정 (`실브로커` 표현)

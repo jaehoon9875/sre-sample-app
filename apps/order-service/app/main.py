@@ -25,20 +25,25 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     Java 의 @PostConstruct / @PreDestroy 와 유사한 개념.
     """
     kafka_started = False
+    redis_started = False
     try:
         await init_redis()
+        redis_started = True
         await kafka_producer.start()
         kafka_started = True
         logger.info("order_service_started")
     except Exception as exc:
         logger.error("order_service_start_failed", error=str(exc))
+        if redis_started:
+            await close_redis()
         raise
     try:
         yield
     finally:
         if kafka_started:
             await kafka_producer.stop()
-        await close_redis()
+        if redis_started:
+            await close_redis()
         logger.info("order_service_stopped")
 
 
