@@ -3,12 +3,17 @@ from collections.abc import AsyncIterator
 
 import structlog
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 from app.dependencies import close_redis, init_redis
 from app.kafka import producer as kafka_producer
 from app.routers import order
 
 logger = structlog.get_logger()
+
+
+class HealthResponse(BaseModel):
+    status: str
 
 
 @asynccontextmanager
@@ -20,8 +25,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     Java 의 @PostConstruct / @PreDestroy 와 유사한 개념.
     """
     kafka_started = False
-    await init_redis()
     try:
+        await init_redis()
         await kafka_producer.start()
         kafka_started = True
         logger.info("order_service_started")
@@ -43,7 +48,7 @@ app = FastAPI(title="Order Service", lifespan=lifespan)
 app.include_router(order.router)
 
 
-@app.get("/health")
-async def health() -> dict:
+@app.get("/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
     """헬스체크 엔드포인트. Kubernetes liveness/readiness probe 에서 호출한다."""
-    return {"status": "ok"}
+    return HealthResponse(status="ok")

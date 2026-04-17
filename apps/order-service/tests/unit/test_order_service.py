@@ -51,7 +51,11 @@ def fake_order() -> Order:
 # ── 테스트 ──────────────────────────────────────────────────────────────────
 
 @pytest.mark.asyncio
-async def test_create_order_success(mock_db, mock_redis, fake_order) -> None:
+async def test_create_order_success(
+    mock_db: AsyncMock,
+    mock_redis: AsyncMock,
+    fake_order: Order,
+) -> None:
     """
     주문 생성 성공 케이스.
     - OrderRepository.create 가 호출되고 order 가 반환되는지 확인
@@ -79,7 +83,11 @@ async def test_create_order_success(mock_db, mock_redis, fake_order) -> None:
 
 
 @pytest.mark.asyncio
-async def test_create_order_kafka_failure_does_not_raise(mock_db, mock_redis, fake_order) -> None:
+async def test_create_order_kafka_failure_does_not_raise(
+    mock_db: AsyncMock,
+    mock_redis: AsyncMock,
+    fake_order: Order,
+) -> None:
     """
     Kafka 발행 실패 시 주문 생성이 롤백되지 않고 정상 반환되는지 확인.
     이벤트 유실은 허용하지만 주문 자체는 유지해야 한다.
@@ -100,7 +108,11 @@ async def test_create_order_kafka_failure_does_not_raise(mock_db, mock_redis, fa
 
 
 @pytest.mark.asyncio
-async def test_get_order_cache_hit(mock_db, mock_redis, fake_order) -> None:
+async def test_get_order_cache_hit(
+    mock_db: AsyncMock,
+    mock_redis: AsyncMock,
+    fake_order: Order,
+) -> None:
     """
     Redis 캐시에 데이터가 있으면 DB 를 조회하지 않는지 확인.
     """
@@ -120,7 +132,11 @@ async def test_get_order_cache_hit(mock_db, mock_redis, fake_order) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_order_cache_miss_sets_cache(mock_db, mock_redis, fake_order) -> None:
+async def test_get_order_cache_miss_sets_cache(
+    mock_db: AsyncMock,
+    mock_redis: AsyncMock,
+    fake_order: Order,
+) -> None:
     """
     캐시 미스 시 DB 에서 조회 후 Redis 에 저장하는지 확인.
     """
@@ -146,7 +162,11 @@ async def test_get_order_cache_miss_sets_cache(mock_db, mock_redis, fake_order) 
 
 
 @pytest.mark.asyncio
-async def test_update_status_invalidates_cache(mock_db, mock_redis, fake_order) -> None:
+async def test_update_status_invalidates_cache(
+    mock_db: AsyncMock,
+    mock_redis: AsyncMock,
+    fake_order: Order,
+) -> None:
     """
     상태 변경 후 Redis 캐시가 삭제되는지 확인.
     캐시가 남아있으면 이전 상태가 계속 반환되는 버그가 발생할 수 있다.

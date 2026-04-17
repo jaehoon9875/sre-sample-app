@@ -33,13 +33,13 @@ PR: https://github.com/jaehoon9875/sre-sample-app/pull/4
 1) [x] Alembic async migration 패턴 정리 (`apps/order-service/alembic/env.py`)
 - `context.configure`와 `run_migrations`를 같은 `run_sync` 흐름으로 묶는 방식 검토.
 
-2) [x] Migration downgrade enum 정리 (`apps/order-service/alembic/versions/9314af2d1ea2_create_orders_table.py`)
+1) [x] Migration downgrade enum 정리 (`apps/order-service/alembic/versions/9314af2d1ea2_create_orders_table.py`)
 - `orderstatus` enum type 제거 누락 여부 점검 및 필요 시 `downgrade()`에 정리 로직 추가.
 
-3) [x] 서비스 반환 타입 일관성 (`apps/order-service/app/services/order.py`)
+1) [x] 서비스 반환 타입 일관성 (`apps/order-service/app/services/order.py`)
 - 캐시 히트 시 `dict` 반환 vs 시그니처 `Order | None` 불일치 해결.
 
-4) [x] Redis 의존성 수명주기 (`apps/order-service/app/dependencies.py`)
+1) [x] Redis 의존성 수명주기 (`apps/order-service/app/dependencies.py`)
 - 요청마다 클라이언트 생성/종료 방식 개선 검토(앱 수명주기 단위 재사용).
 
 ---
