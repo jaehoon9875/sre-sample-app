@@ -5,6 +5,25 @@
 
 ---
 
+## Python 버전
+
+**Python 3.12** 사용. 모든 서비스 공통.
+
+- `X | None` union 문법, `match` 등 3.10+ 문법 사용 가능
+- 각 서비스 디렉토리에 `.python-version` 파일로 pyenv 버전 고정
+- Dockerfile 베이스 이미지도 `python:3.12-slim` 사용
+
+로컬 환경 세팅:
+```bash
+brew install python@3.12  # 아직 없으면 설치
+cd apps/order-service
+python3.12 -m venv .venv  # 반드시 python3.12 로 venv 생성
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
 ## 기본 규칙
 
 - 모든 함수에 타입 힌트 필수 (파라미터 + 반환값)
