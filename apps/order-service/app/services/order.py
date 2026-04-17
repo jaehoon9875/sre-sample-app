@@ -9,6 +9,7 @@ from app.kafka import producer as kafka_producer
 from app.models.order import Order, OrderStatus
 from app.repositories.order import OrderRepository
 from app.schemas.order import OrderCreate
+from app.schemas.order import OrderResponse
 
 logger = structlog.get_logger()
 
@@ -67,17 +68,14 @@ class OrderService:
 
         return order
 
-    async def get_order(self, order_id: uuid.UUID) -> Order | None:
+    async def get_order(self, order_id: uuid.UUID) -> OrderResponse | None:
         cache_key = CACHE_KEY.format(order_id=order_id)
 
         # 1. Redis 캐시 먼저 조회
         cached = await self.redis.get(cache_key)
         if cached:
-            # 캐시 히트: JSON 문자열 → dict 반환
-            # 주의: 여기서는 dict 를 반환한다. router 에서 OrderResponse(**dict) 로 변환 가능.
-            # 또는 Pydantic model_validate 를 사용하는 것이 더 안전하다.
             logger.info("order_cache_hit", order_id=str(order_id))
-            return json.loads(cached)  # type: ignore[return-value]
+            return OrderResponse.model_validate_json(cached)
 
         # 2. 캐시 미스: DB 조회
         order = await self.repo.get_by_id(order_id)
@@ -87,7 +85,7 @@ class OrderService:
         # 3. 조회 결과를 캐시에 저장 (TTL 300초)
         await self.redis.set(cache_key, json.dumps(_order_to_dict(order)), ex=CACHE_TTL)
         logger.info("order_cache_set", order_id=str(order_id))
-        return order
+        return OrderResponse.model_validate(order, from_attributes=True)
 
     async def update_status(self, order_id: uuid.UUID, status: OrderStatus) -> Order | None:
         # 1. DB 업데이트

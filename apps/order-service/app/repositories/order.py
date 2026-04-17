@@ -40,7 +40,10 @@ class OrderRepository:
         await self.db.commit()    # 실제 DB 에 INSERT 실행
         # commit 후 응답 직렬화 단계에서 lazy-load가 발생하지 않도록
         # 관계(items)를 포함해 다시 조회한 객체를 반환한다.
-        return await self.get_by_id(order.id)  # type: ignore[return-value]
+        created_order = await self.get_by_id(order.id)
+        if created_order is None:
+            raise ValueError(f"Failed to load created order: {order.id}")
+        return created_order
 
     async def get_by_id(self, order_id: uuid.UUID) -> Order | None:
         # selectinload: items 관계를 별도 SELECT 로 미리 로딩 (N+1 문제 방지)

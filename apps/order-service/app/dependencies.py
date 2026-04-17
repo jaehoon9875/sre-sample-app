@@ -14,6 +14,35 @@ engine = create_async_engine(settings.DATABASE_URL, pool_pre_ping=True)
 # expire_on_commit=False: commit 이후에도 모델 객체의 속성에 접근 가능하게 한다.
 #   (True 이면 commit 후 다시 DB 에서 로딩하려 해서 async 환경에서 오류 발생 가능)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+redis_client: aioredis.Redis | None = None
+
+
+def _get_or_create_redis_client() -> aioredis.Redis:
+    global redis_client
+    if redis_client is None:
+        redis_client = aioredis.from_url(
+            settings.REDIS_URL,
+            encoding="utf-8",
+            decode_responses=True,  # bytes 대신 str 로 자동 디코딩
+        )
+    return redis_client
+
+
+async def init_redis() -> None:
+    """
+    앱 시작 시 Redis 클라이언트를 초기화한다.
+    """
+    _get_or_create_redis_client()
+
+
+async def close_redis() -> None:
+    """
+    앱 종료 시 Redis 클라이언트를 정리한다.
+    """
+    global redis_client
+    if redis_client is not None:
+        await redis_client.aclose()
+        redis_client = None
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -31,14 +60,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def get_redis() -> AsyncGenerator[aioredis.Redis, None]:
     """
     FastAPI Depends 용 Redis 클라이언트 제공 함수.
-    요청마다 커넥션을 열고, 요청이 끝나면 닫는다.
+    앱 수명주기 동안 재사용하는 클라이언트를 요청에 주입한다.
     """
-    redis = aioredis.from_url(
-        settings.REDIS_URL,
-        encoding="utf-8",
-        decode_responses=True,  # bytes 대신 str 로 자동 디코딩
-    )
-    try:
-        yield redis
-    finally:
-        await redis.aclose()
+    yield _get_or_create_redis_client()

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, UTC
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -133,6 +133,7 @@ async def test_get_order_cache_miss_sets_cache(mock_db, mock_redis, fake_order):
         result = await service.get_order(fake_order.id)
 
         # DB 조회 후 캐시 저장 확인
+        assert result is not None
         MockRepo.return_value.get_by_id.assert_called_once_with(fake_order.id)
         mock_redis.set.assert_called_once()  # redis.set 이 한 번 호출됐는지 확인
 

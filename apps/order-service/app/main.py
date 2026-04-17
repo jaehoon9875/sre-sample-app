@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 
+from app.dependencies import close_redis, init_redis
 from app.kafka import producer as kafka_producer
 from app.routers import order
 
@@ -17,11 +18,15 @@ async def lifespan(app: FastAPI):
     yield 이후: 앱 종료 시 실행 (리소스 정리)
     Java 의 @PostConstruct / @PreDestroy 와 유사한 개념.
     """
+    await init_redis()
     await kafka_producer.start()
     logger.info("order_service_started")
-    yield
-    await kafka_producer.stop()
-    logger.info("order_service_stopped")
+    try:
+        yield
+    finally:
+        await kafka_producer.stop()
+        await close_redis()
+        logger.info("order_service_stopped")
 
 
 app = FastAPI(title="Order Service", lifespan=lifespan)

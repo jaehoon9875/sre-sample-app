@@ -28,6 +28,8 @@ async def test_order_created_event_published_to_kafka():
     try:
         await consumer.start()
     except Exception as exc:  # pragma: no cover - e2e 환경 체크용
+        # start() 실패 경로에서도 consumer 리소스를 정리해 경고를 방지한다.
+        await consumer.stop()
         pytest.skip(f"Kafka not reachable at localhost:29092: {exc}")
 
     try:
@@ -58,7 +60,7 @@ async def test_order_created_event_published_to_kafka():
         for _ in range(15):
             try:
                 record = await asyncio.wait_for(consumer.getone(), timeout=1.0)
-            except TimeoutError:
+            except asyncio.TimeoutError:
                 continue
 
             payload = record.value
