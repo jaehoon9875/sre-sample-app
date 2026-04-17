@@ -1,3 +1,5 @@
+from collections.abc import AsyncGenerator
+
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -13,7 +15,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 
 @pytest_asyncio.fixture
-async def db_session():
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     테스트마다 새 인메모리 DB 를 만들고 테스트 후 삭제한다.
     각 테스트가 독립적인 DB 상태에서 실행되므로 서로 간섭하지 않는다.
@@ -35,7 +37,7 @@ async def db_session():
 
 
 @pytest_asyncio.fixture
-async def async_client(db_session: AsyncSession):
+async def async_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """
     테스트용 HTTP 클라이언트.
     실제 서버를 띄우지 않고 ASGI 앱에 직접 요청을 보낸다.

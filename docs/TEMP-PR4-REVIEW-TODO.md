@@ -56,11 +56,15 @@ PR: https://github.com/jaehoon9875/sre-sample-app/pull/4
 ## 중간 우선순위 (시간 여유 시)
 
 - [ ] `apps/order-service/README.md` 오타 수정 (`실브로커` 표현)
+  <!-- TODO: README에서 '실브로커' 표현을 일관된 용어로 수정 -->
 - [ ] Markdown fence 공백 규칙(MD031) 정리
+  <!-- TODO: apps/CLAUDE.md, docs/PLAN.md의 코드펜스 전후 공백 규칙 적용 -->
   - `apps/CLAUDE.md`
   - `docs/PLAN.md`
 - [ ] 테스트 함수/fixture 타입 힌트 보강
+  <!-- TODO: tests/conftest.py, tests/unit/test_order_service.py에 반환 타입 힌트 추가 -->
 - [ ] e2e timeout 예외를 `asyncio.TimeoutError`로 명시
+  <!-- TODO: e2e Kafka 테스트에서 TimeoutError를 asyncio.TimeoutError로 통일 -->
 
 ---
 

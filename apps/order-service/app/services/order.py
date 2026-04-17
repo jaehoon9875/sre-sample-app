@@ -72,10 +72,17 @@ class OrderService:
         cache_key = CACHE_KEY.format(order_id=order_id)
 
         # 1. Redis 캐시 먼저 조회
-        cached = await self.redis.get(cache_key)
+        try:
+            cached = await self.redis.get(cache_key)
+        except Exception as exc:
+            logger.warning("order_cache_get_failed", order_id=str(order_id), error=str(exc))
+            cached = None
         if cached:
-            logger.info("order_cache_hit", order_id=str(order_id))
-            return OrderResponse.model_validate_json(cached)
+            try:
+                logger.info("order_cache_hit", order_id=str(order_id))
+                return OrderResponse.model_validate_json(cached)
+            except Exception as exc:
+                logger.warning("order_cache_deserialize_failed", order_id=str(order_id), error=str(exc))
 
         # 2. 캐시 미스: DB 조회
         order = await self.repo.get_by_id(order_id)
@@ -83,8 +90,11 @@ class OrderService:
             return None
 
         # 3. 조회 결과를 캐시에 저장 (TTL 300초)
-        await self.redis.set(cache_key, json.dumps(_order_to_dict(order)), ex=CACHE_TTL)
-        logger.info("order_cache_set", order_id=str(order_id))
+        try:
+            await self.redis.set(cache_key, json.dumps(_order_to_dict(order)), ex=CACHE_TTL)
+            logger.info("order_cache_set", order_id=str(order_id))
+        except Exception as exc:
+            logger.warning("order_cache_set_failed", order_id=str(order_id), error=str(exc))
         return OrderResponse.model_validate(order, from_attributes=True)
 
     async def update_status(self, order_id: uuid.UUID, status: OrderStatus) -> Order | None:
@@ -95,7 +105,15 @@ class OrderService:
 
         # 2. 캐시 무효화: 상태가 바뀌었으므로 캐시를 지워서 다음 조회 때 DB 에서 새로 읽게 한다
         cache_key = CACHE_KEY.format(order_id=order_id)
-        await self.redis.delete(cache_key)
-        logger.info("order_cache_invalidated", order_id=str(order_id), new_status=status)
+        try:
+            await self.redis.delete(cache_key)
+            logger.info("order_cache_invalidated", order_id=str(order_id), new_status=status)
+        except Exception as exc:
+            logger.warning(
+                "order_cache_invalidate_failed",
+                order_id=str(order_id),
+                new_status=status,
+                error=str(exc),
+            )
 
         return order

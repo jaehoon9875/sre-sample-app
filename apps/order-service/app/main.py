@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 
 import structlog
 from fastapi import FastAPI
@@ -11,20 +12,27 @@ logger = structlog.get_logger()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
     앱의 시작/종료 시점에 실행되는 코드를 정의한다.
     yield 이전: 앱 시작 시 실행 (리소스 초기화)
     yield 이후: 앱 종료 시 실행 (리소스 정리)
     Java 의 @PostConstruct / @PreDestroy 와 유사한 개념.
     """
+    kafka_started = False
     await init_redis()
-    await kafka_producer.start()
-    logger.info("order_service_started")
+    try:
+        await kafka_producer.start()
+        kafka_started = True
+        logger.info("order_service_started")
+    except Exception as exc:
+        logger.error("order_service_start_failed", error=str(exc))
+        raise
     try:
         yield
     finally:
-        await kafka_producer.stop()
+        if kafka_started:
+            await kafka_producer.stop()
         await close_redis()
         logger.info("order_service_stopped")
 

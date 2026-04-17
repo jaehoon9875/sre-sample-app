@@ -9,7 +9,7 @@ from aiokafka import AIOKafkaConsumer
 
 @pytest.mark.asyncio
 @pytest.mark.kafka
-async def test_order_created_event_published_to_kafka():
+async def test_order_created_event_published_to_kafka() -> None:
     """
     실제 order-service + Kafka 연동 환경에서 주문 생성 이벤트 발행을 검증한다.
     - 필요 조건:
